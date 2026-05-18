@@ -15,7 +15,6 @@ export default function Layout() {
   const [isUserModalOpen, setIsUserModalOpen] = useState(false)
   const [pendingRoute, setPendingRoute] = useState<string | null>(null)
 
-  // useState so header re-renders after login/logout
   const [currentUser, setCurrentUser] = useState<AuthUser | null>(() => {
     const stored = localStorage.getItem('user')
     return stored ? JSON.parse(stored) : null
@@ -27,7 +26,6 @@ export default function Layout() {
       setPendingRoute('/rated')
       setIsUserModalOpen(true)
     }
-    // if logged in, Link navigates normally — no need to call navigate()
   }
 
   const handleLoginClick = () => {
@@ -35,14 +33,16 @@ export default function Layout() {
   }
 
   const handleLogout = () => {
-    localStorage.removeItem('token')
+    localStorage.removeItem('access_token')
+    localStorage.removeItem('refresh_token')
     localStorage.removeItem('user')
     setCurrentUser(null)
     navigate('/')
   }
 
-  const handleAuthSuccess = (user: AuthUser, token: string) => {
-    localStorage.setItem('token', token)
+  const handleAuthSuccess = (user: AuthUser, accessToken: string, refreshToken: string) => {
+    localStorage.setItem('access_token', accessToken)
+    localStorage.setItem('refresh_token', refreshToken)
     localStorage.setItem('user', JSON.stringify(user))
     setCurrentUser(user)
     setIsUserModalOpen(false)

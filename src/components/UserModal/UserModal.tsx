@@ -10,7 +10,7 @@ type AuthUser = {
 type UserModalProps = {
   isOpen: boolean
   onClose: () => void
-  onAuthSuccess: (user: AuthUser, token: string) => void
+  onAuthSuccess: (user: AuthUser, accessToken: string, refreshToken: string) => void
 }
 
 type Tab = 'login' | 'register'
@@ -55,25 +55,16 @@ export default function UserModal({ isOpen, onClose, onAuthSuccess }: UserModalP
       setError(null)
 
       if (tab === 'register') {
-        // 1. create user
         await api.post('/users', { username: username.trim(), password })
-
-        // 2. auto-login after register
-        const loginRes = await api.post<{ access_token: string; user: AuthUser }>('/login', {
-          username: username.trim(),
-          password,
-        })
-
-        onAuthSuccess(loginRes.data.user, loginRes.data.access_token)
-      } else {
-        const loginRes = await api.post<{ access_token: string; user: AuthUser }>('/login', {
-          username: username.trim(),
-          password,
-        })
-
-        onAuthSuccess(loginRes.data.user, loginRes.data.access_token)
       }
 
+      const loginRes = await api.post<{
+        access_token: string
+        refresh_token: string
+        user: AuthUser
+      }>('/login', { username: username.trim(), password })
+
+      onAuthSuccess(loginRes.data.user, loginRes.data.access_token, loginRes.data.refresh_token)
       reset()
     } catch (err: unknown) {
       if (err && typeof err === 'object' && 'response' in err) {

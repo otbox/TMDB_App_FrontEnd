@@ -16,20 +16,19 @@ api.interceptors.response.use(
       original._retry = true
       try {
         const refreshToken = localStorage.getItem('refresh_token')
-        const { data } = await axios.post(api + '/refresh', {}, {
+        const { data } = await axios.post('http://localhost:5000/api/refresh', {}, {
           headers: { Authorization: `Bearer ${refreshToken}` }
         })
         localStorage.setItem('access_token', data.access_token)
         original.headers.Authorization = `Bearer ${data.access_token}`
-        return api(original)  
+        return api(original)
       } catch {
-        localStorage.clear()   
+        localStorage.clear()
         window.location.href = '/'
       }
     }
     return Promise.reject(error)
   }
 )
-
 
 export default api
