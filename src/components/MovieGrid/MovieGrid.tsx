@@ -14,7 +14,7 @@ type MovieGridProps = {
 export default function MovieGrid({ onAuthRequired }: MovieGridProps) {
   const [query, setQuery] = useState('')
   const [movies, setMovies] = useState<Movie[]>([])
-  const [page, setPage] = useState(1)
+  const [, setPage] = useState(1)
   const [hasMore, setHasMore] = useState(true)
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState<string | null>(null)

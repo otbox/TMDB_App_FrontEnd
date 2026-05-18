@@ -1,6 +1,5 @@
 import { Link, Outlet, useNavigate, useLocation } from 'react-router-dom'
 import { useState } from 'react'
-import SearchBar from '../SearchBar/SearchBar'
 import UserModal from '../UserModal/UserModal'
 import './style.css'
 

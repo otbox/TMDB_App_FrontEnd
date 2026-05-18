@@ -16,14 +16,14 @@ api.interceptors.response.use(
       original._retry = true
       try {
         const refreshToken = localStorage.getItem('refresh_token')
-        const { data } = await axios.post('/api/refresh', {}, {
+        const { data } = await axios.post(api + '/refresh', {}, {
           headers: { Authorization: `Bearer ${refreshToken}` }
         })
         localStorage.setItem('access_token', data.access_token)
         original.headers.Authorization = `Bearer ${data.access_token}`
-        return api(original)   // retry original request
+        return api(original)  
       } catch {
-        localStorage.clear()   // refresh expired → force re-login
+        localStorage.clear()   
         window.location.href = '/'
       }
     }
