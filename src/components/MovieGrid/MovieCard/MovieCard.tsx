@@ -2,12 +2,11 @@ import './style.css'
 import type { Movie } from '../../../types/Movie'
 import StarRating from './StarRating/StarRating'
 
-
 type MovieCardProps = {
   movie: Movie
   userRating?: number | null
   onSelect: (movie: Movie) => void
-  onRate: (movieId: number, rating: number) => void
+  onRate: (movieId: number, rating: number, alreadyRated: boolean) => void
 }
 
 export default function MovieCard({
@@ -65,7 +64,7 @@ export default function MovieCard({
 
             <StarRating
               value={userRating ?? 0}
-              onChange={(rating) => onRate(id, rating)}
+              onChange={(rating) => onRate(id, rating, !!userRating)}
             />
           </div>
         </div>

@@ -14,18 +14,21 @@ export default function Layout() {
   const location = useLocation()
 
   const [isUserModalOpen, setIsUserModalOpen] = useState(false)
+  const [pendingRoute, setPendingRoute] = useState<string | null>(null)
 
-  const storedUser = localStorage.getItem('user')
-  const currentUser: AuthUser | null = storedUser ? JSON.parse(storedUser) : null
+  // useState so header re-renders after login/logout
+  const [currentUser, setCurrentUser] = useState<AuthUser | null>(() => {
+    const stored = localStorage.getItem('user')
+    return stored ? JSON.parse(stored) : null
+  })
 
   const handleRatedClick = (event: React.MouseEvent<HTMLAnchorElement>) => {
     if (!currentUser) {
       event.preventDefault()
+      setPendingRoute('/rated')
       setIsUserModalOpen(true)
-      return
     }
-
-    navigate('/rated')
+    // if logged in, Link navigates normally — no need to call navigate()
   }
 
   const handleLoginClick = () => {
@@ -35,7 +38,20 @@ export default function Layout() {
   const handleLogout = () => {
     localStorage.removeItem('token')
     localStorage.removeItem('user')
+    setCurrentUser(null)
     navigate('/')
+  }
+
+  const handleAuthSuccess = (user: AuthUser, token: string) => {
+    localStorage.setItem('token', token)
+    localStorage.setItem('user', JSON.stringify(user))
+    setCurrentUser(user)
+    setIsUserModalOpen(false)
+
+    if (pendingRoute) {
+      navigate(pendingRoute)
+      setPendingRoute(null)
+    }
   }
 
   return (
@@ -83,11 +99,11 @@ export default function Layout() {
 
       <UserModal
         isOpen={isUserModalOpen}
-        onClose={() => setIsUserModalOpen(false)}
-        onUserCreated={(user) => {
-          localStorage.setItem('user', JSON.stringify(user))
+        onClose={() => {
           setIsUserModalOpen(false)
+          setPendingRoute(null)
         }}
+        onAuthSuccess={handleAuthSuccess}
       />
     </div>
   )

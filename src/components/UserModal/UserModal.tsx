@@ -1,16 +1,21 @@
 import { useState } from 'react'
+import api from '../../services/api'
+
+type AuthUser = {
+  id: number
+  username: string
+}
 
 type UserModalProps = {
   isOpen: boolean
   onClose: () => void
-  onUserCreated: (user: { id: number; username: string }) => void
+  onAuthSuccess: (user: AuthUser, token: string) => void
 }
 
-export default function UserModal({
-  isOpen,
-  onClose,
-  onUserCreated,
-}: UserModalProps) {
+type Tab = 'login' | 'register'
+
+export default function UserModal({ isOpen, onClose, onAuthSuccess }: UserModalProps) {
+  const [tab, setTab] = useState<Tab>('login')
   const [username, setUsername] = useState('')
   const [password, setPassword] = useState('')
   const [confirmPassword, setConfirmPassword] = useState('')
@@ -18,6 +23,18 @@ export default function UserModal({
   const [error, setError] = useState<string | null>(null)
 
   if (!isOpen) return null
+
+  const reset = () => {
+    setUsername('')
+    setPassword('')
+    setConfirmPassword('')
+    setError(null)
+  }
+
+  const switchTab = (next: Tab) => {
+    setTab(next)
+    reset()
+  }
 
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault()
@@ -27,7 +44,7 @@ export default function UserModal({
       return
     }
 
-    if (password !== confirmPassword) {
+    if (tab === 'register' && password !== confirmPassword) {
       setError('Passwords do not match')
       return
     }
@@ -36,30 +53,34 @@ export default function UserModal({
       setLoading(true)
       setError(null)
 
-      const response = await fetch('http://localhost:5000/api/users', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
+      if (tab === 'register') {
+        // 1. create user
+        await api.post('/users', { username: username.trim(), password })
+
+        // 2. auto-login after register
+        const loginRes = await api.post<{ access_token: string; user: AuthUser }>('/login', {
           username: username.trim(),
           password,
-        }),
-      })
+        })
 
-      const data = await response.json()
+        onAuthSuccess(loginRes.data.user, loginRes.data.access_token)
+      } else {
+        const loginRes = await api.post<{ access_token: string; user: AuthUser }>('/login', {
+          username: username.trim(),
+          password,
+        })
 
-      if (!response.ok) {
-        throw new Error(data.message || 'Failed to create user')
+        onAuthSuccess(loginRes.data.user, loginRes.data.access_token)
       }
 
-      onUserCreated(data)
-      setUsername('')
-      setPassword('')
-      setConfirmPassword('')
-      onClose()
-    } catch (err) {
-      setError(err instanceof Error ? err.message : 'Unexpected error')
+      reset()
+    } catch (err: unknown) {
+      if (err && typeof err === 'object' && 'response' in err) {
+        const axiosErr = err as { response: { data: { message: string } } }
+        setError(axiosErr.response?.data?.message || 'Unexpected error')
+      } else {
+        setError('Unexpected error')
+      }
     } finally {
       setLoading(false)
     }
@@ -67,11 +88,26 @@ export default function UserModal({
 
   return (
     <div className="modal-backdrop" onClick={onClose}>
-      <div
-        className="modal-content"
-        onClick={(e) => e.stopPropagation()}
-      >
-        <h2>Create user</h2>
+      <div className="modal-content" onClick={(e) => e.stopPropagation()}>
+
+        <div className="modal-tabs">
+          <button
+            type="button"
+            className={tab === 'login' ? 'active' : ''}
+            onClick={() => switchTab('login')}
+          >
+            Login
+          </button>
+          <button
+            type="button"
+            className={tab === 'register' ? 'active' : ''}
+            onClick={() => switchTab('register')}
+          >
+            Register
+          </button>
+        </div>
+
+        <h2>{tab === 'login' ? 'Welcome back' : 'Create account'}</h2>
 
         <form onSubmit={handleSubmit}>
           <div>
@@ -94,25 +130,28 @@ export default function UserModal({
             />
           </div>
 
-          <div>
-            <label htmlFor="confirmPassword">Confirm password</label>
-            <input
-              id="confirmPassword"
-              type="password"
-              value={confirmPassword}
-              onChange={(e) => setConfirmPassword(e.target.value)}
-            />
-          </div>
+          {tab === 'register' && (
+            <div>
+              <label htmlFor="confirmPassword">Confirm password</label>
+              <input
+                id="confirmPassword"
+                type="password"
+                value={confirmPassword}
+                onChange={(e) => setConfirmPassword(e.target.value)}
+              />
+            </div>
+          )}
 
-          {error && <p>{error}</p>}
+          {error && <p className="modal-error">{error}</p>}
 
-          <div>
+          <div className="modal-actions">
             <button type="button" onClick={onClose}>
               Cancel
             </button>
-
             <button type="submit" disabled={loading}>
-              {loading ? 'Creating...' : 'Create user'}
+              {loading
+                ? tab === 'login' ? 'Logging in...' : 'Creating...'
+                : tab === 'login' ? 'Login' : 'Create account'}
             </button>
           </div>
         </form>

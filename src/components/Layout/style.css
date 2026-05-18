@@ -1,0 +1,145 @@
+.layout {
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+  background-color: #0f0f0f;
+  color: #e0e0e0;
+}
+
+/* ── Header ── */
+.layout__header {
+  position: sticky;
+  top: 0;
+  z-index: 100;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  padding: 14px 24px;
+  background-color: #141414;
+  border-bottom: 1px solid #2a2a2a;
+}
+
+/* ── Left: nav links ── */
+.layout__left {
+  display: flex;
+  align-items: center;
+  flex-shrink: 0;
+}
+
+.layout__nav {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.layout__nav a {
+  padding: 6px 14px;
+  border-radius: 6px;
+  font-size: 0.9rem;
+  font-weight: 500;
+  color: #aaaaaa;
+  text-decoration: none;
+  transition: color 150ms ease, background-color 150ms ease;
+}
+
+.layout__nav a:hover {
+  color: #ffffff;
+  background-color: #1f1f1f;
+}
+
+.layout__nav a.active {
+  color: #ffffff;
+  background-color: #262626;
+}
+
+/* ── Center: search bar ── */
+.layout__center {
+  flex: 1;
+  display: flex;
+  justify-content: center;
+  min-width: 0;
+}
+
+/* ── Right: auth ── */
+.layout__right {
+  display: flex;
+  align-items: center;
+  flex-shrink: 0;
+}
+
+.layout__auth {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.layout__username {
+  font-size: 0.875rem;
+  font-weight: 500;
+  color: #cccccc;
+  white-space: nowrap;
+}
+
+.layout__right button,
+.layout__auth button {
+  padding: 7px 16px;
+  border-radius: 6px;
+  font-size: 0.875rem;
+  font-weight: 500;
+  border: 1px solid #333333;
+  background-color: transparent;
+  color: #cccccc;
+  cursor: pointer;
+  transition: background-color 150ms ease, color 150ms ease, border-color 150ms ease;
+  white-space: nowrap;
+}
+
+.layout__right button:hover,
+.layout__auth button:hover {
+  background-color: #1f1f1f;
+  color: #ffffff;
+  border-color: #555555;
+}
+
+/* ── Main content ── */
+.layout__main {
+  flex: 1;
+  padding: 24px;
+  max-width: 1400px;
+  width: 100%;
+  margin-inline: auto;
+}
+
+
+@media (max-width: 768px) {
+  .layout__header {
+    flex-wrap: wrap;
+    gap: 10px;
+    padding: 12px 16px;
+  }
+
+  .layout__center {
+    order: 3;
+    flex: 1 1 100%;
+  }
+
+  .layout__left {
+    order: 1;
+  }
+
+  .layout__right {
+    order: 2;
+  }
+
+  .layout__main {
+    padding: 16px;
+  }
+}
+
+@media (max-width: 480px) {
+  .layout__nav a {
+    padding: 5px 10px;
+    font-size: 0.825rem;
+  }
+}
