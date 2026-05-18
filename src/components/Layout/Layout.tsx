@@ -34,13 +34,15 @@ export default function Layout() {
 
   const handleLogout = () => {
     localStorage.removeItem('token')
+    localStorage.removeItem('refresh_token')
     localStorage.removeItem('user')
     setCurrentUser(null)
     navigate('/')
   }
 
-  const handleAuthSuccess = (user: AuthUser, token: string) => {
-    localStorage.setItem('token', token)
+  const handleAuthSuccess = (user: AuthUser, accessToken: string, refreshToken: string) => {
+    localStorage.setItem('token', accessToken)
+    localStorage.setItem('refresh_token', refreshToken)
     localStorage.setItem('user', JSON.stringify(user))
     setCurrentUser(user)
     setIsUserModalOpen(false)
