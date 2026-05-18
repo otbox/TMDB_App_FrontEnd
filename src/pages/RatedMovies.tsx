@@ -1,4 +1,5 @@
 import { useEffect, useState } from 'react'
+import { useOutletContext } from 'react-router-dom'
 import { getRatings, type Rating } from '../services/ratingsService'
 import { getMovieDetails } from '../services/tmdbService'
 import type { MovieDetails } from '../types/MovieDetails'
@@ -6,12 +7,19 @@ import { MovieModal } from '../components/MovieGrid/MovieModal/MovieModal'
 import type { Movie } from '../types/Movie'
 import './RatedMovies.css'
 
+type LayoutContext = {
+  onAuthRequired: () => void
+  isLoggedIn: boolean
+}
+
 type RatedMovieEntry = {
   details: MovieDetails
   rating: number
 }
 
 export default function RatedMovies() {
+  const { onAuthRequired, isLoggedIn } = useOutletContext<LayoutContext>()
+
   const [entries, setEntries] = useState<RatedMovieEntry[]>([])
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
@@ -47,12 +55,11 @@ export default function RatedMovies() {
   }, [])
 
   function handleSelect(entry: RatedMovieEntry) {
-    // convert MovieDetails → Movie shape for the modal
     setSelectedMovie({
       id: entry.details.id,
       title: entry.details.title,
-      poster_path: entry.details.poster_path || "",
-      backdrop_path: entry.details.backdrop_path || "",
+      poster_path: entry.details.poster_path || '',
+      backdrop_path: entry.details.backdrop_path || '',
       overview: entry.details.overview,
       release_date: entry.details.release_date as unknown as Date,
       vote_average: entry.details.vote_average,
@@ -139,9 +146,9 @@ export default function RatedMovies() {
 
                 <div className="rated-card__score">
                   <span className="rated-card__stars">
-                    {'★'.repeat(Math.floor(rating))}
-                    {rating % 1 !== 0 ? '½' : ''}
-                    {'☆'.repeat(5 - Math.ceil(rating))}
+                    {'\u2605'.repeat(Math.floor(rating))}
+                    {rating % 1 !== 0 ? '\u00bd' : ''}
+                    {'\u2606'.repeat(5 - Math.ceil(rating))}
                   </span>
                   <span className="rated-card__score-value">{rating} / 5</span>
                 </div>
@@ -154,6 +161,8 @@ export default function RatedMovies() {
       <MovieModal
         movie={selectedMovie}
         onClose={() => setSelectedMovie(null)}
+        onAuthRequired={onAuthRequired}
+        isLoggedIn={isLoggedIn}
       />
     </div>
   )
