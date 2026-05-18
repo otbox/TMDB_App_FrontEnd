@@ -1,23 +1,35 @@
 import axios from 'axios'
 
-const api = axios.create({
-  baseURL: import.meta.env.VITE_API_URL ?? 'http://localhost:5000/api',
-  headers: {
-    'Content-Type': 'application/json',
-  },
+const api = axios.create({ baseURL: 'http://localhost:5000/api' })
+
+api.interceptors.request.use((config) => {
+  const token = localStorage.getItem('access_token')
+  if (token) config.headers.Authorization = `Bearer ${token}`
+  return config
 })
 
-api.interceptors.request.use(
-  (config) => {
-    const token = localStorage.getItem('token')
-
-    if (token) {
-      config.headers.Authorization = `Bearer ${token}`
+api.interceptors.response.use(
+  (res) => res,
+  async (error) => {
+    const original = error.config
+    if (error.response?.status === 401 && !original._retry) {
+      original._retry = true
+      try {
+        const refreshToken = localStorage.getItem('refresh_token')
+        const { data } = await axios.post('/api/refresh', {}, {
+          headers: { Authorization: `Bearer ${refreshToken}` }
+        })
+        localStorage.setItem('access_token', data.access_token)
+        original.headers.Authorization = `Bearer ${data.access_token}`
+        return api(original)   // retry original request
+      } catch {
+        localStorage.clear()   // refresh expired → force re-login
+        window.location.href = '/'
+      }
     }
-
-    return config
-  },
-  (error) => Promise.reject(error)
+    return Promise.reject(error)
+  }
 )
+
 
 export default api
