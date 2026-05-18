@@ -51,8 +51,9 @@
 }
 
 #root {
-  width: 1126px;
   max-width: 100%;
+  padding-left: 5vw;
+  padding-right: 5vw;
   margin: 0 auto;
   text-align: center;
   border-inline: 1px solid var(--border);

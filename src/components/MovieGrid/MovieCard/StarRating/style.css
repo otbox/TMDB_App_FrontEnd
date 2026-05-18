@@ -1,0 +1,46 @@
+.star-rating {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.star {
+  position: relative;
+  width: 24px;
+  height: 24px;
+  padding: 0;
+  border: none;
+  background: transparent;
+  cursor: pointer;
+}
+
+.star__base,
+.star__fill {
+  position: absolute;
+  inset: 0;
+  font-size: 24px;
+  line-height: 1;
+}
+
+.star__base {
+  color: rgba(255, 255, 255, 0.25);
+}
+
+.star__fill {
+  color: #ffd54a;
+  overflow: hidden;
+  width: 0;
+  white-space: nowrap;
+}
+
+.star--full .star__fill {
+  width: 100%;
+}
+
+.star--half .star__fill {
+  width: 50%;
+}
+
+.star--empty .star__fill {
+  width: 0%;
+}
