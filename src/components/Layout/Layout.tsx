@@ -33,16 +33,14 @@ export default function Layout() {
   }
 
   const handleLogout = () => {
-    localStorage.removeItem('access_token')
-    localStorage.removeItem('refresh_token')
+    localStorage.removeItem('token')
     localStorage.removeItem('user')
     setCurrentUser(null)
     navigate('/')
   }
 
-  const handleAuthSuccess = (user: AuthUser, accessToken: string, refreshToken: string) => {
-    localStorage.setItem('access_token', accessToken)
-    localStorage.setItem('refresh_token', refreshToken)
+  const handleAuthSuccess = (user: AuthUser, token: string) => {
+    localStorage.setItem('token', token)
     localStorage.setItem('user', JSON.stringify(user))
     setCurrentUser(user)
     setIsUserModalOpen(false)
@@ -89,7 +87,10 @@ export default function Layout() {
       </header>
 
       <main className="layout__main">
-         <Outlet context={{ onAuthRequired: () => setIsUserModalOpen(true) }} />
+        <Outlet context={{
+          onAuthRequired: () => setIsUserModalOpen(true),
+          isLoggedIn: !!currentUser
+        }} />
       </main>
 
       <UserModal

@@ -15,23 +15,20 @@ type MovieModalProps = {
   movie: Movie | null
   onClose: () => void
   onAuthRequired?: () => void
+  isLoggedIn?: boolean
 }
 
-function MovieModalComponent({ movie, onClose, onAuthRequired }: MovieModalProps) {
+function MovieModalComponent({ movie, onClose, onAuthRequired, isLoggedIn = false }: MovieModalProps) {
   const [details, setDetails]   = useState<MovieDetails | null>(null)
   const [loading, setLoading]   = useState(false)
   const [error, setError]       = useState<string | null>(null)
 
-  // rating state
   const [existingRating, setExistingRating] = useState<number | null>(null)
   const [pickedStar, setPickedStar]         = useState<number>(0)
   const [ratingLoading, setRatingLoading]   = useState(false)
   const [ratingError, setRatingError]       = useState<string | null>(null)
   const [isEditing, setIsEditing]           = useState(false)
 
-  const isLoggedIn = !!localStorage.getItem('token')
-
-  // Load movie details
   useEffect(() => {
     if (!movie?.id) return
     let ignore = false
@@ -54,7 +51,6 @@ function MovieModalComponent({ movie, onClose, onAuthRequired }: MovieModalProps
     return () => { ignore = true }
   }, [movie?.id])
 
-  // Load existing rating whenever movie changes
   useEffect(() => {
     if (!movie?.id || !isLoggedIn) {
       setExistingRating(null)
@@ -75,7 +71,6 @@ function MovieModalComponent({ movie, onClose, onAuthRequired }: MovieModalProps
           setIsEditing(false)
         }
       } catch {
-        // 404 = not rated yet, that's fine
         if (!ignore) {
           setExistingRating(null)
           setPickedStar(0)
@@ -214,10 +209,9 @@ function MovieModalComponent({ movie, onClose, onAuthRequired }: MovieModalProps
 
                 <div className="modal-section">
                   <h3>Genres</h3>
-                  <p>{details.genres.map((g) => g.name).join(' • ')}</p>
+                  <p>{details.genres.map((g) => g.name).join(' \u2022 ')}</p>
                 </div>
 
-                {/* ── RATING SECTION ── */}
                 <div className="modal-section modal-rating">
                   <h3>Your Rating</h3>
 
@@ -237,7 +231,7 @@ function MovieModalComponent({ movie, onClose, onAuthRequired }: MovieModalProps
                   {isLoggedIn && existingRating !== null && !isEditing && (
                     <div className="rating-display">
                       <div className="rating-display__stars">
-                        {'★'.repeat(existingRating)}{'☆'.repeat(5 - existingRating)}
+                        {'\u2605'.repeat(existingRating)}{'\u2606'.repeat(5 - existingRating)}
                       </div>
                       <span className="rating-display__value">{existingRating} / 5</span>
                       <div className="rating-display__actions">

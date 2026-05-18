@@ -9,9 +9,10 @@ import { MovieModal } from './MovieModal/MovieModal'
 
 type MovieGridProps = {
   onAuthRequired: () => void
+  isLoggedIn: boolean
 }
 
-export default function MovieGrid({ onAuthRequired }: MovieGridProps) {
+export default function MovieGrid({ onAuthRequired, isLoggedIn }: MovieGridProps) {
   const [query, setQuery] = useState('')
   const [movies, setMovies] = useState<Movie[]>([])
   const [, setPage] = useState(1)
@@ -42,8 +43,7 @@ export default function MovieGrid({ onAuthRequired }: MovieGridProps) {
   }, [])
 
   useEffect(() => {
-    const token = localStorage.getItem('token')
-    if (!token) return
+    if (!isLoggedIn) return
     async function loadRatings() {
       try {
         const data: Rating[] = await getRatings()
@@ -53,11 +53,10 @@ export default function MovieGrid({ onAuthRequired }: MovieGridProps) {
       } catch { /* not logged in */ }
     }
     loadRatings()
-  }, [])
+  }, [isLoggedIn])
 
   async function handleRate(movieId: number, value: number, alreadyRated: boolean) {
-    const token = localStorage.getItem('token')
-    if (!token) { onAuthRequired(); return }
+    if (!isLoggedIn) { onAuthRequired(); return }
     try {
       if (alreadyRated) {
         await updateRating(movieId, value)
@@ -108,7 +107,6 @@ export default function MovieGrid({ onAuthRequired }: MovieGridProps) {
     }
   }, [])
 
-  // re-fetch whenever query or genre changes
   useEffect(() => {
     setMovies([])
     setPage(1)
@@ -140,7 +138,6 @@ export default function MovieGrid({ onAuthRequired }: MovieGridProps) {
   return (
     <div>
       <div className="header-grid">
-        {/* search input — self-contained, no Layout dependency */}
         <input
           type="search"
           className="search-input"
@@ -227,7 +224,12 @@ export default function MovieGrid({ onAuthRequired }: MovieGridProps) {
         </div>
       )}
 
-      <MovieModal movie={selectedMovie} onClose={() => setSelectedMovie(null)} />
+      <MovieModal
+        movie={selectedMovie}
+        onClose={() => setSelectedMovie(null)}
+        onAuthRequired={onAuthRequired}
+        isLoggedIn={isLoggedIn}
+      />
     </div>
   )
 }

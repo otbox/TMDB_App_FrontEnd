@@ -3,14 +3,15 @@ import MovieGrid from '../components/MovieGrid/MovieGrid'
 
 type LayoutContext = {
   onAuthRequired: () => void
+  isLoggedIn: boolean
 }
 
 export default function Home() {
-  const { onAuthRequired } = useOutletContext<LayoutContext>()
+  const { onAuthRequired, isLoggedIn } = useOutletContext<LayoutContext>()
 
   return (
     <div>
-      <MovieGrid onAuthRequired={onAuthRequired} />
+      <MovieGrid onAuthRequired={onAuthRequired} isLoggedIn={isLoggedIn} />
     </div>
   )
 }
