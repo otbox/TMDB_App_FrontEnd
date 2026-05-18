@@ -3,10 +3,17 @@ import './style.css'
 
 type StarRatingProps = {
   value: number
-  onChange: (value: number) => void
+  onChange?: (value: number) => void
+  readonly?: boolean
+  size?: 'sm' | 'md' | 'lg'
 }
 
-export default function StarRating({ value, onChange }: StarRatingProps) {
+export default function StarRating({
+  value,
+  onChange,
+  readonly = false,
+  size = 'md',
+}: StarRatingProps) {
   const [hoverValue, setHoverValue] = useState<number | null>(null)
 
   const displayValue = hoverValue ?? value
@@ -16,40 +23,26 @@ export default function StarRating({ value, onChange }: StarRatingProps) {
     starIndex: number
   ) => {
     const rect = event.currentTarget.getBoundingClientRect()
-    const clickX = event.clientX - rect.left
-    const isHalf = clickX < rect.width / 2
-
+    const isHalf = event.clientX - rect.left < rect.width / 2
     return isHalf ? starIndex - 0.5 : starIndex
   }
 
-  const handleMouseMove = (
-    event: React.MouseEvent<HTMLButtonElement>,
-    starIndex: number
-  ) => {
-    const nextHoverValue = getRatingFromMouse(event, starIndex)
-    setHoverValue(nextHoverValue)
-  }
-
-  const handleClick = (
-    event: React.MouseEvent<HTMLButtonElement>,
-    starIndex: number
-  ) => {
-    const nextValue = getRatingFromMouse(event, starIndex)
-    console.log(nextValue)
-    onChange(nextValue)
-  }
-
-  const handleMouseLeave = () => {
-    setHoverValue(null)
-  }
-
-  const renderStar = (starIndex: number): React.JSX.Element => {
+  const renderStar = (starIndex: number) => {
     let starClass = 'empty'
+    if (displayValue >= starIndex) starClass = 'full'
+    else if (displayValue >= starIndex - 0.5) starClass = 'half'
 
-    if (displayValue >= starIndex) {
-      starClass = 'full'
-    } else if (displayValue >= starIndex - 0.5) {
-      starClass = 'half'
+    if (readonly) {
+      return (
+        <span
+          key={starIndex}
+          className={`star star--${starClass}`}
+          aria-hidden="true"
+        >
+          <span className="star__base">★</span>
+          <span className="star__fill">★</span>
+        </span>
+      )
     }
 
     return (
@@ -57,9 +50,9 @@ export default function StarRating({ value, onChange }: StarRatingProps) {
         key={starIndex}
         type="button"
         className={`star star--${starClass}`}
-        onMouseMove={(event) => handleMouseMove(event, starIndex)}
-        onMouseLeave={handleMouseLeave}
-        onClick={(event) => handleClick(event, starIndex)}
+        onMouseMove={(e) => setHoverValue(getRatingFromMouse(e, starIndex))}
+        onMouseLeave={() => setHoverValue(null)}
+        onClick={(e) => onChange?.(getRatingFromMouse(e, starIndex))}
         aria-label={`Rate ${starIndex} stars`}
       >
         <span className="star__base">★</span>
@@ -69,7 +62,11 @@ export default function StarRating({ value, onChange }: StarRatingProps) {
   }
 
   return (
-    <div className="star-rating" role="group" aria-label="Rate this movie">
+    <div
+      className={`star-rating star-rating--${size}${readonly ? ' star-rating--readonly' : ''}`}
+      role={readonly ? 'img' : 'group'}
+      aria-label={readonly ? `Rating: ${value} out of 5` : 'Rate this movie'}
+    >
       {[1, 2, 3, 4, 5].map(renderStar)}
     </div>
   )

@@ -44,3 +44,9 @@
 .star--empty .star__fill {
   width: 0%;
 }
+
+.star-rating--sm .star { font-size: 0.85rem; }
+.star-rating--md .star { font-size: 1.4rem; }   
+.star-rating--lg .star { font-size: 2rem;   }
+
+.star-rating--readonly .star { cursor: default; pointer-events: none; }
