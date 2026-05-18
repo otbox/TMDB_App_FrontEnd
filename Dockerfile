@@ -1,5 +1,6 @@
 # Stage 1: build
 FROM node:alpine AS builder
+RUN corepack enable
 WORKDIR /app
 COPY package*.json yarn.lock ./
 RUN yarn install --frozen-lockfile
