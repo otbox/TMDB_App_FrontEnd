@@ -4,6 +4,7 @@ import type { Genre, Movie } from '../../types/Movie'
 import MovieCard from './MovieCard/MovieCard'
 import './style.css'
 import { MovieModal } from './MovieModal/MovieModal'
+import { createRating, updateRating } from '../../services/ratingsService'
 
 export default function MovieGrid() {
     const [movies, setMovies] = useState<Movie[]>([])
@@ -35,7 +36,13 @@ export default function MovieGrid() {
     }, [])
 
 
-    const handleRate = (movie: Movie) => setSelectedMovie(movie) // call api 
+    async function handleRate(movieId: number, value: number, alreadyRated: boolean) {
+    if (alreadyRated) {
+        await updateRating(movieId, value)
+    } else {
+        await createRating(movieId, value)
+    }
+}
  
     const loadMovies = useCallback(async (
         pageToLoad: number,
