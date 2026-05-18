@@ -73,10 +73,6 @@ export default function Layout() {
           </nav>
         </div>
 
-        <div className="layout__center">
-          <SearchBar />
-        </div>
-
         <div className="layout__right">
           {currentUser ? (
             <div className="layout__auth">
@@ -94,7 +90,7 @@ export default function Layout() {
       </header>
 
       <main className="layout__main">
-        <Outlet />
+         <Outlet context={{ onAuthRequired: () => setIsUserModalOpen(true) }} />
       </main>
 
       <UserModal

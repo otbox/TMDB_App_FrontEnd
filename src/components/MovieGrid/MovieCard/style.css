@@ -88,3 +88,23 @@
   outline: 2px solid #ffffff;
   outline-offset: 3px;
 }
+
+.movie-card__user-rating {
+  margin-top: 10px;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.movie-card__user-rating-label {
+  font-size: 0.7rem;
+  font-weight: 500;
+  color: rgba(255, 255, 255, 0.6);
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+
+
+.movie-card {
+  width: clamp(130px, 14vw, 220px);
+}

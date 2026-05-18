@@ -1,5 +1,6 @@
 import { useState } from 'react'
 import api from '../../services/api'
+import './style.css'
 
 type AuthUser = {
   id: number
@@ -87,10 +88,10 @@ export default function UserModal({ isOpen, onClose, onAuthSuccess }: UserModalP
   }
 
   return (
-    <div className="modal-backdrop" onClick={onClose}>
-      <div className="modal-content" onClick={(e) => e.stopPropagation()}>
+    <div className="modal-user-backdrop" onClick={onClose}>
+      <div className="modal-user-content" onClick={(e) => e.stopPropagation()}>
 
-        <div className="modal-tabs">
+        <div className="modal-user-tabs">
           <button
             type="button"
             className={tab === 'login' ? 'active' : ''}
@@ -142,9 +143,9 @@ export default function UserModal({ isOpen, onClose, onAuthSuccess }: UserModalP
             </div>
           )}
 
-          {error && <p className="modal-error">{error}</p>}
+          {error && <p className="modal-user-error">{error}</p>}
 
-          <div className="modal-actions">
+          <div className="modal-user-actions">
             <button type="button" onClick={onClose}>
               Cancel
             </button>

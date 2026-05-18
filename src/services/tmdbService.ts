@@ -1,16 +1,10 @@
-import type { Genre, Movie } from "../types/Movie";
+import type { Genre } from "../types/Movie";
 import type { MovieCredits, MovieDetails } from "../types/MovieDetails";
-import type { PaginatedMoviesResponse } from "../types/PaginatedMoviesResponse";
 
 
 
 const url: string = "https://api.themoviedb.org/3";
 const apiKey: string = import.meta.env.VITE_API_KEY_TMDB;
-
-type getAllMoviesResponse = {
-    page: number,
-    results: Movie[]
-}
 
 type getAllGenresReposnsa = {
     genres : Genre[]
@@ -85,21 +79,6 @@ export async function getAllGenresMovies(): Promise<Genre[]> {
     const data : getAllGenresReposnsa = await response.json();
     return data.genres
 }
-
-// export async function getAllMovies(page = 1): Promise<PaginatedMoviesResponse> {
-//   const response = await fetch(`${url}/discover/movie?page=${page}`, {
-//     headers: {
-//       Authorization: `Bearer ${apiKey}`,
-//       accept: 'application/json',
-//     },
-//   })
-
-//   if (!response.ok) {
-//     throw new Error('Failed to fetch movies')
-//   }
-
-//   return await response.json() as PaginatedMoviesResponse
-// }
 
 export async function getAllMovies(page = 1, genreId?: number) {
   const params = new URLSearchParams({

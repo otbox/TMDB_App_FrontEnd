@@ -8,11 +8,11 @@ import './style.css'
 import { MovieModal } from './MovieModal/MovieModal'
 
 type MovieGridProps = {
-  query: string                           // lifted up from Layout/SearchBar
-  onAuthRequired: () => void             // opens UserModal if not logged in
+  onAuthRequired: () => void
 }
 
-export default function MovieGrid({ query, onAuthRequired }: MovieGridProps) {
+export default function MovieGrid({ onAuthRequired }: MovieGridProps) {
+  const [query, setQuery] = useState('')
   const [movies, setMovies] = useState<Movie[]>([])
   const [page, setPage] = useState(1)
   const [hasMore, setHasMore] = useState(true)
@@ -23,7 +23,6 @@ export default function MovieGrid({ query, onAuthRequired }: MovieGridProps) {
   const [genres, setGenres] = useState<Genre[]>([])
   const [selectedGenre, setSelectedGenre] = useState<Genre | null>(null)
   const [isGenreMenuOpen, setIsGenreMenuOpen] = useState(false)
-
 
   const [userRatings, setUserRatings] = useState<Record<number, number>>({})
 
@@ -42,39 +41,29 @@ export default function MovieGrid({ query, onAuthRequired }: MovieGridProps) {
     loadGenres()
   }, [])
 
-
   useEffect(() => {
     const token = localStorage.getItem('token')
     if (!token) return
-
     async function loadRatings() {
       try {
         const data: Rating[] = await getRatings()
         const map: Record<number, number> = {}
         data.forEach((r) => { map[r.movie_id] = r.rating })
         setUserRatings(map)
-      } catch {
-
-      }
+      } catch { /* not logged in */ }
     }
     loadRatings()
   }, [])
 
   async function handleRate(movieId: number, value: number, alreadyRated: boolean) {
     const token = localStorage.getItem('token')
-
-    if (!token) {
-      onAuthRequired()   
-      return
-    }
-
+    if (!token) { onAuthRequired(); return }
     try {
       if (alreadyRated) {
         await updateRating(movieId, value)
       } else {
         await createRating(movieId, value)
       }
-
       setUserRatings((prev) => ({ ...prev, [movieId]: value }))
     } catch (err) {
       console.error('Failed to save rating', err)
@@ -100,9 +89,7 @@ export default function MovieGrid({ query, onAuthRequired }: MovieGridProps) {
       let results: Movie[] = data.results
 
       if (currentQuery.trim() && currentGenre) {
-        results = results.filter((movie) =>
-          movie.genre_ids?.includes(currentGenre.id)
-        )
+        results = results.filter((m) => m.genre_ids?.includes(currentGenre.id))
       }
 
       setMovies((prev) => {
@@ -121,6 +108,7 @@ export default function MovieGrid({ query, onAuthRequired }: MovieGridProps) {
     }
   }, [])
 
+  // re-fetch whenever query or genre changes
   useEffect(() => {
     setMovies([])
     setPage(1)
@@ -152,6 +140,16 @@ export default function MovieGrid({ query, onAuthRequired }: MovieGridProps) {
   return (
     <div>
       <div className="header-grid">
+        {/* search input — self-contained, no Layout dependency */}
+        <input
+          type="search"
+          className="search-input"
+          placeholder="Search movies..."
+          value={query}
+          onChange={(e) => setQuery(e.target.value)}
+          aria-label="Search movies"
+        />
+
         <div className="genre-dropdown">
           <button
             type="button"
@@ -166,10 +164,7 @@ export default function MovieGrid({ query, onAuthRequired }: MovieGridProps) {
               <button
                 type="button"
                 className="genre-item"
-                onClick={() => {
-                  setSelectedGenre(null)
-                  setIsGenreMenuOpen(false)
-                }}
+                onClick={() => { setSelectedGenre(null); setIsGenreMenuOpen(false) }}
               >
                 All categories
               </button>
@@ -179,10 +174,7 @@ export default function MovieGrid({ query, onAuthRequired }: MovieGridProps) {
                   key={genre.id}
                   type="button"
                   className="genre-item"
-                  onClick={() => {
-                    setSelectedGenre(genre)
-                    setIsGenreMenuOpen(false)
-                  }}
+                  onClick={() => { setSelectedGenre(genre); setIsGenreMenuOpen(false) }}
                 >
                   {genre.name}
                 </button>
@@ -195,7 +187,7 @@ export default function MovieGrid({ query, onAuthRequired }: MovieGridProps) {
               type="button"
               className="clear-button"
               onClick={handleClearFilters}
-              aria-label="Clear category filter"
+              aria-label="Clear filters"
             >
               Clear
             </button>
@@ -206,7 +198,6 @@ export default function MovieGrid({ query, onAuthRequired }: MovieGridProps) {
       <div className="movie-grid">
         {movies.map((movie, index) => {
           const isLast = index === movies.length - 1
-
           return (
             <div key={movie.id} ref={isLast ? lastMovieElementRef : undefined}>
               <MovieCard
@@ -220,9 +211,21 @@ export default function MovieGrid({ query, onAuthRequired }: MovieGridProps) {
         })}
       </div>
 
-      {loading && <p>Loading more movies...</p>}
-      {error && <p>{error}</p>}
-      {!loading && !error && movies.length === 0 && <p>No movies found.</p>}
+      {loading && (
+        <div className="grid-status">
+          <span className="grid-status__text">Loading...</span>
+        </div>
+      )}
+      {error && (
+        <div className="grid-status grid-status--error">
+          <span className="grid-status__text">{error}</span>
+        </div>
+      )}
+      {!loading && !error && movies.length === 0 && (
+        <div className="grid-status">
+          <span className="grid-status__text">No movies found.</span>
+        </div>
+      )}
 
       <MovieModal movie={selectedMovie} onClose={() => setSelectedMovie(null)} />
     </div>
