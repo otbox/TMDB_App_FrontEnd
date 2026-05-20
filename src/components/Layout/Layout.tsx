@@ -28,9 +28,7 @@ export default function Layout() {
     }
   }
 
-  const handleLoginClick = () => {
-    setIsUserModalOpen(true)
-  }
+  const handleLoginClick = () => setIsUserModalOpen(true)
 
   const handleLogout = () => {
     localStorage.removeItem('token')
@@ -46,29 +44,22 @@ export default function Layout() {
     localStorage.setItem('user', JSON.stringify(user))
     setCurrentUser(user)
     setIsUserModalOpen(false)
-
     if (pendingRoute) {
       navigate(pendingRoute)
       setPendingRoute(null)
     }
   }
 
+  const isActive = (path: string) => location.pathname === path ? 'active' : ''
+
   return (
     <div className="layout">
       <header className="layout__header">
         <div className="layout__left">
           <nav className="layout__nav">
-            <Link to="/" className={location.pathname === '/' ? 'active' : ''}>
-              Home
-            </Link>
-
-            <Link
-              to="/rated"
-              onClick={handleRatedClick}
-              className={location.pathname === '/rated' ? 'active' : ''}
-            >
-              Rated Movies
-            </Link>
+            <Link to="/" className={isActive('/')}>Movies</Link>
+            <Link to="/rick-and-morty" className={isActive('/rick-and-morty')}>Rick &amp; Morty</Link>
+            <Link to="/rated" onClick={handleRatedClick} className={isActive('/rated')}>Rated</Link>
           </nav>
         </div>
 
@@ -76,14 +67,10 @@ export default function Layout() {
           {currentUser ? (
             <div className="layout__auth">
               <span className="layout__username">{currentUser.username}</span>
-              <button type="button" onClick={handleLogout}>
-                Logout
-              </button>
+              <button type="button" onClick={handleLogout}>Logout</button>
             </div>
           ) : (
-            <button type="button" onClick={handleLoginClick}>
-              Login
-            </button>
+            <button type="button" onClick={handleLoginClick}>Login</button>
           )}
         </div>
       </header>
@@ -97,10 +84,7 @@ export default function Layout() {
 
       <UserModal
         isOpen={isUserModalOpen}
-        onClose={() => {
-          setIsUserModalOpen(false)
-          setPendingRoute(null)
-        }}
+        onClose={() => { setIsUserModalOpen(false); setPendingRoute(null) }}
         onAuthSuccess={handleAuthSuccess}
       />
     </div>
