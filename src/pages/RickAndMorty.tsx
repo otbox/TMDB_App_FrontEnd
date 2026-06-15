@@ -13,7 +13,7 @@ export default function RickAndMorty() {
   const { onAuthRequired, isLoggedIn } = useOutletContext<LayoutContext>()
 
   const [episodes, setEpisodes] = useState<RMEpisode[]>([])
-  const [page, setPage] = useState(1)
+  const [, setPage] = useState(1)
   const [hasMore, setHasMore] = useState(true)
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState<string | null>(null)
